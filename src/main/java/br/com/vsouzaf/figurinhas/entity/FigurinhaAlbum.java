@@ -1,6 +1,7 @@
 package br.com.vsouzaf.figurinhas.entity;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
@@ -12,6 +13,7 @@ public class FigurinhaAlbum {
 	
 	private String numero;
 	
+	@DBRef
 	private Album album;
 	
 	public String getId() {
