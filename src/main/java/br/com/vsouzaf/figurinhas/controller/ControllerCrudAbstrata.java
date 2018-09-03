@@ -1,5 +1,7 @@
 package br.com.vsouzaf.figurinhas.controller;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
@@ -8,15 +10,18 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
-import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import br.com.vsouzaf.figurinhas.service.ServicoCrudAbstrata;
 import br.com.vsouzaf.figurinhas.to.ToAbstata;
@@ -32,6 +37,31 @@ public abstract class ControllerCrudAbstrata<S extends ServicoCrudAbstrata, T ex
 	public ControllerCrudAbstrata(S service, Class<T> classeTo) {
 		this.servico = service;
 		this.classeTo = classeTo;
+	}
+	
+	@RequestMapping(value = "formulario", method= RequestMethod.GET, produces = "application/json; charset=UTF-8")
+	public String getFormulario() throws Exception {
+		String nomeFormulario = this.classeTo.getSimpleName();
+		Integer posicaoASerRemovida = nomeFormulario.indexOf("To");
+		nomeFormulario = nomeFormulario.substring(0, posicaoASerRemovida);
+		nomeFormulario = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, nomeFormulario);
+		
+		JsonParser jsonParser = new JsonParser();
+		
+		JsonObject jsonObject;
+		try {
+			String nomeArquivo = "formulario/" + nomeFormulario + ".json";
+			String arquivo = this.getClass().getClassLoader().getResource(nomeArquivo).getFile();
+			jsonObject = (JsonObject) jsonParser.parse(new FileReader(arquivo));
+		} catch (JsonIOException e) {
+			throw new Exception("Não foi possível ler o arquivo JSON");
+		} catch (JsonSyntaxException e) {
+			throw new Exception("Não foi possível ler o arquivo JSON");
+		} catch (FileNotFoundException e) {
+			throw new Exception("Arquivo não encontrado, verifique se o existe um arquivo com mesmo nome da Classe TO: " + nomeFormulario);
+		}
+		
+		return jsonObject.toString();
 	}
 
 	@RequestMapping(value = "/paginacao/{pagina}/{numeroDaPagina}", method = RequestMethod.GET)
