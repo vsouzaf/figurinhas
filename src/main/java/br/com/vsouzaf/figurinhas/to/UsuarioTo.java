@@ -1,22 +1,13 @@
-package br.com.vsouzaf.figurinhas.entity;
+package br.com.vsouzaf.figurinhas.to;
 
-import java.util.List;
+import br.com.vsouzaf.figurinhas.entity.BeanAbstrata;
+import br.com.vsouzaf.figurinhas.entity.Usuario;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+public class UsuarioTo extends ToAbstata {
 
-import br.com.vsouzaf.figurinhas.to.ToAbstata;
-import br.com.vsouzaf.figurinhas.to.UsuarioTo;
-
-@Document
-public class Usuario extends BeanAbstrata {
-
-    @Id
     private String id;
 
     private String nome;
-
-    private List<Perfil> perfis;
 
     private int idade;
 
@@ -24,19 +15,17 @@ public class Usuario extends BeanAbstrata {
     
     private String senha;
 
-    public Usuario() {
+    public UsuarioTo() {
     }
 
-    public Usuario(Usuario usuario) {
+    public UsuarioTo(UsuarioTo usuario) {
         this.nome = usuario.getNome();
         this.email = usuario.getEmail();
         this.senha = usuario.getSenha();
-        this.perfis = usuario.getPerfis();
     }
 
-    public Usuario(String nome, List<Perfil> perfis, String email, String senha) {
+    public UsuarioTo(String nome, String email, String senha) {
         this.nome = nome;
-        this.perfis = perfis;
         this.email = email;
         this.senha = senha;
     }
@@ -82,17 +71,9 @@ public class Usuario extends BeanAbstrata {
         this.email = email;
     }
 
-    public List<Perfil> getPerfis() {
-        return perfis;
-    }
-
-    public void setPerfis(List<Perfil> perfis) {
-        this.perfis = perfis;
-    }
-
 	@Override
-	public ToAbstata converterParaTo() {
-		UsuarioTo usuario = new UsuarioTo();
+	public BeanAbstrata converterParaBean() {
+		Usuario usuario = new Usuario();
 		usuario.setId(id);
 		usuario.setEmail(email);
 		usuario.setIdade(idade);
