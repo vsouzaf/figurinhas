@@ -9,15 +9,25 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -41,16 +51,22 @@ public abstract class ControllerCrudAbstrata<S extends ServicoCrudAbstrata, T ex
 	
 	@RequestMapping(value = "formulario", method= RequestMethod.GET, produces = "application/json; charset=UTF-8")
 	public String getFormulario() throws Exception {
-		String nomeFormulario = this.classeTo.getSimpleName();
-		Integer posicaoASerRemovida = nomeFormulario.indexOf("To");
-		nomeFormulario = nomeFormulario.substring(0, posicaoASerRemovida);
-		nomeFormulario = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, nomeFormulario);
+		JsonObject jsonObject = getJsonFormulario();
+		
+		return jsonObject.toString();
+	}
+
+	protected JsonObject getJsonFormulario() throws Exception {
+		String nomeTo = this.classeTo.getSimpleName();
+		Integer posicaoASerRemovida = nomeTo.indexOf("To");
+		nomeTo = nomeTo.substring(0, posicaoASerRemovida);
+		nomeTo = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, nomeTo);
 		
 		JsonParser jsonParser = new JsonParser();
 		
 		JsonObject jsonObject;
 		try {
-			String nomeArquivo = "formulario/" + nomeFormulario + ".json";
+			String nomeArquivo = "formulario/" + nomeTo + "/formulario.json";
 			String arquivo = this.getClass().getClassLoader().getResource(nomeArquivo).getFile();
 			jsonObject = (JsonObject) jsonParser.parse(new FileReader(arquivo));
 		} catch (JsonIOException e) {
@@ -58,10 +74,9 @@ public abstract class ControllerCrudAbstrata<S extends ServicoCrudAbstrata, T ex
 		} catch (JsonSyntaxException e) {
 			throw new Exception("Não foi possível ler o arquivo JSON");
 		} catch (FileNotFoundException e) {
-			throw new Exception("Arquivo não encontrado, verifique se o existe um arquivo com mesmo nome da Classe TO: " + nomeFormulario);
+			throw new Exception("Arquivo não encontrado, verifique se existe uma pasta com mesmo nome da Classe TO: " + nomeTo);
 		}
-		
-		return jsonObject.toString();
+		return jsonObject;
 	}
 
 	@RequestMapping(value = "/paginacao/{pagina}/{numeroDaPagina}", method = RequestMethod.GET)
@@ -71,7 +86,7 @@ public abstract class ControllerCrudAbstrata<S extends ServicoCrudAbstrata, T ex
 	}
 
 	@RequestMapping(method = RequestMethod.POST)
-	public @ResponseBody Map<String, Object> salvar(@RequestBody T json) {
+	public @ResponseBody Map<String, Object> salvar(@Valid @RequestBody T json) {
 		T created = (T) this.servico.salvar(json);
 
 		Map<String, Object> m = Maps.newHashMap();
@@ -92,4 +107,23 @@ public abstract class ControllerCrudAbstrata<S extends ServicoCrudAbstrata, T ex
 		m.put("success", true);
 		return m;
 	}
+	
+	@ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handleException(MethodArgumentNotValidException exception) {
+		HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+	    
+		JsonArray jsonErros = new JsonArray();
+        List<FieldError> errorMsg = exception.getBindingResult().getFieldErrors();
+        
+        for (FieldError fieldError : errorMsg) {
+        	JsonObject jsonErro = new JsonObject();
+			jsonErro.addProperty("nomeDoCampo", fieldError.getField());
+			jsonErro.addProperty("mensagemDeErro", fieldError.getDefaultMessage());
+			jsonErros.add(jsonErro);
+		}
+        
+        return new ResponseEntity<String>(jsonErros.toString(), headers, HttpStatus.BAD_REQUEST);
+    }
 }

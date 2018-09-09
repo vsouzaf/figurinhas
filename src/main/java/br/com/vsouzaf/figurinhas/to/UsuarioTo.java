@@ -1,5 +1,7 @@
 package br.com.vsouzaf.figurinhas.to;
 
+import javax.validation.constraints.NotNull;
+
 import br.com.vsouzaf.figurinhas.entity.BeanAbstrata;
 import br.com.vsouzaf.figurinhas.entity.Usuario;
 
@@ -8,11 +10,14 @@ public class UsuarioTo extends ToAbstata {
     private String id;
 
     private String nome;
-
+	
+    @NotNull
     private int idade;
-
+    
+    @NotNull
     private String email;
     
+    @NotNull
     private String senha;
 
     public UsuarioTo() {

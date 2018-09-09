@@ -1,7 +1,5 @@
 package br.com.vsouzaf.figurinhas.entity;
 
-import java.util.List;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -16,8 +14,6 @@ public class Usuario extends BeanAbstrata {
 
     private String nome;
 
-    private List<Perfil> perfis;
-
     private int idade;
 
     private String email;
@@ -31,12 +27,10 @@ public class Usuario extends BeanAbstrata {
         this.nome = usuario.getNome();
         this.email = usuario.getEmail();
         this.senha = usuario.getSenha();
-        this.perfis = usuario.getPerfis();
     }
 
-    public Usuario(String nome, List<Perfil> perfis, String email, String senha) {
+    public Usuario(String nome, String email, String senha) {
         this.nome = nome;
-        this.perfis = perfis;
         this.email = email;
         this.senha = senha;
     }
@@ -80,14 +74,6 @@ public class Usuario extends BeanAbstrata {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public List<Perfil> getPerfis() {
-        return perfis;
-    }
-
-    public void setPerfis(List<Perfil> perfis) {
-        this.perfis = perfis;
     }
 
 	@Override

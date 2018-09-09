@@ -1,6 +1,7 @@
 package br.com.vsouzaf.figurinhas.config;
 
 import java.util.Collection;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -14,7 +15,7 @@ public class MyUserDetails extends Usuario implements UserDetails{
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return getPerfis();
+        return null;
     }
 
     @Override

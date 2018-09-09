@@ -1,0 +1,10 @@
+{
+	"nome": "usuario",
+	"campos": [
+		{
+			"name": "nome",
+			"type": "text",
+			"label": "Nome de Usuário"
+		}
+	]
+}
